@@ -1,0 +1,75 @@
+<html>
+<head><title>view_main</title>
+<style type="text/css">
+* {
+   margin:0;
+   padding:0;
+}
+
+body{
+   text-align:center;
+   background: #efe4bf none repeat scroll 0 0;
+}
+
+#wrapper{
+   width:960px;
+   margin:0 auto;
+   text-align:left;
+   background-color: #fff;
+   border-radius: 0 0 10px 10px;
+   padding: 20px;
+   box-shadow: 1px -2px 14px rgba(0, 0, 0, 0.4);
+}
+
+#header{
+ color: #fff;
+ background-color: #2c5b9c;
+ height: 3.5em;
+ padding: 1em 0em 1em 1em;
+
+}
+
+#site{
+    background-color: #fff;
+    padding: 20px 0px 0px 0px;
+}
+.centerBlock{
+	margin:0 auto;
+}
+</style>
+
+<body>
+	<div id="wrapper">
+		<div id="header">
+		<h1> ProjectFunder </h1>
+        </div>
+        <form action="view_profile" method="post">
+            <button name="profil">Mein Profil</button>
+        </form>
+		<div id="projekte">
+            <h2>Offene Projekte</h2>
+            <br>
+            {% if offeneProjekte %}
+                {% for offenesProjekt in offeneProjekte %}
+                <form method="post" action="view_project"><button name="kennung" value="{{ offenesProjekt[0] }}">{{ offenesProjekt[1] }}</button></form>
+                <h3><a href="view_profile.html">Von: {{ offenesProjekt[2] }}</a></h3>
+                <h3>Aktuell: {{ offenesProjekt[3] }}</h3>
+                {% endfor %}
+            {% endif %}
+            <hr>
+            <h2>Abgeschlossene Projekte</h2>
+            <br>
+            {% if abgeschlosseneProjekte %}
+                {% for abgeschlossenesProjekt in abgeschlosseneProjekte %}
+                <form method="post" action="view_project"><button name="kennung" value="{{ abgeschlossenesProjekt[0] }}">{{ abgeschlossenesProjekt[1] }}</button></form>
+                <h3><a href="view_profile.html">Von: {{ abgeschlossenesProjekt[2] }}</a></h3>
+                <h3>Aktuell: {{ abgeschlossenesProjekt[3] }}</h3>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <form action="new_project" method="get">
+            <button name="newProject">Projekt erstellen</button>
+        </form>
+	</div>
+</body>
+</html>
