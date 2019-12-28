@@ -51,8 +51,8 @@ body{
             <br>
             {% if offeneProjekte %}
                 {% for offenesProjekt in offeneProjekte %}
-                <form method="post" action="view_project"><button name="kennung" value="{{ offenesProjekt[0] }}">{{ offenesProjekt[1] }}</button></form>
-                <h3><a href="view_profile.html">Von: {{ offenesProjekt[2] }}</a></h3>
+                <form method="get" action="view_project"><button name="kennung" value="{{ offenesProjekt[0] }}">{{ offenesProjekt[1] }}</button></form>
+                <form method="get" action="view_profile"><button name="benutzer" value="{{ offenesProjekt[2] }}">Von: {{ offenesProjekt[2] }}</button></form>
                 <h3>Aktuell: {{ offenesProjekt[3] }}</h3>
                 {% endfor %}
             {% endif %}
@@ -61,7 +61,7 @@ body{
             <br>
             {% if abgeschlosseneProjekte %}
                 {% for abgeschlossenesProjekt in abgeschlosseneProjekte %}
-                <form method="post" action="view_project"><button name="kennung" value="{{ abgeschlossenesProjekt[0] }}">{{ abgeschlossenesProjekt[1] }}</button></form>
+                <form method="get" action="view_project"><button name="kennung" value="{{ abgeschlossenesProjekt[0] }}">{{ abgeschlossenesProjekt[1] }}</button></form>
                 <h3><a href="view_profile.html">Von: {{ abgeschlossenesProjekt[2] }}</a></h3>
                 <h3>Aktuell: {{ abgeschlossenesProjekt[3] }}</h3>
                 {% endfor %}

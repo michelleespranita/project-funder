@@ -124,7 +124,6 @@ def viewMainGet():
     abgeschlosseneProjekte = curs.fetchall()
     curs.execute("SELECT projekt, SUM(spendenbetrag) FROM spenden GROUP BY projekt")
     spendenbetraege = curs.fetchall()
-    print(spendenbetraege)
     offeneProjekte = [(offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], spendenbetrag[1]) if spendenbetrag[0] == offenesProjekt[0] else (offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], 0) for offenesProjekt in offeneProjekte for spendenbetrag in spendenbetraege]
     abgeschlosseneProjekte = [(abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], spendenbetrag[1]) for abgeschlossenesProjekt in abgeschlosseneProjekte for spendenbetrag in spendenbetraege if spendenbetrag[0] == abgeschlossenesProjekt[0]]
     return render_template("view_main.html", offeneProjekte=offeneProjekte, abgeschlosseneProjekte=abgeschlosseneProjekte)
@@ -152,9 +151,9 @@ def newProjectPost():
     projectSt.close() # Connection has to be closed when we want the changes that the SQL statement made to persist
     return redirect(url_for('viewMainGet'))
 
-@app.route('/view_project', methods=['POST'])
+@app.route('/view_project', methods=['GET'])
 def viewProjectGet():
-    id = request.form['kennung']
+    id = request.args.get('kennung')
     conn = connect.DBUtil().getExternalConnection()
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
@@ -187,9 +186,124 @@ def viewProjectGet():
     spender = curs.fetchall()
     curs.execute("SELECT b.name, CAST(k.text AS VARCHAR(1000)) AS text, k.sichtbarkeit FROM benutzer b, schreibt s, kommentar k WHERE b.email=s.benutzer AND k.id=s.kommentar AND s.projekt=" + str(id) + " ORDER BY k.datum DESC")
     kommentare = curs.fetchall()
-    return render_template("view_project.html", pfad=pfad, titel=titel, ersteller=ersteller, beschreibung=beschreibung, finanzierungslimit=finanzierungslimit, spendensumme=spendensumme, status=status, vorgaenger=vorgaenger, spender=spender, kommentare=kommentare)
+    return render_template("view_project.html", kennung=id, pfad=pfad, titel=titel, ersteller=ersteller, beschreibung=beschreibung, finanzierungslimit=finanzierungslimit, spendensumme=spendensumme, status=status, vorgaenger=vorgaenger, spender=spender, kommentare=kommentare)
 
-@app.route('/edit_project')
+@app.route('/edit_project', methods=['GET']) 
+def editProjectGet():
+    id = request.args.get('kennung')
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("SELECT kennung, titel, CAST(beschreibung AS VARCHAR(1000)) AS beschreibung, status, finanzierungslimit, ersteller, vorgaenger, kategorie FROM projekt WHERE kennung = " + str(id))
+    result = curs.fetchall()[0]
+    titel = result[1]
+    beschreibung = result[2]
+    finanzierungslimit = result[4]
+    vorgaenger = result[6] # projekt id (nur 1)
+    curs.execute("SELECT kennung, titel FROM projekt WHERE ersteller = '" + currentUser + "'")
+    projekte = curs.fetchall()
+    kategorie = result[7]
+    health, art, edu, tech = '', '', '', ''
+    if kategorie == 1:
+        health = 'checked'
+    elif kategorie == 2:
+        art = 'checked'
+    elif kategorie == 3:
+        edu = 'checked'
+    elif kategorie == 4:
+        tech = 'checked'
+    return render_template('edit_project.html', kennung=id, titel=titel, finanzierungslimit=finanzierungslimit, health=health, art=art, edu=edu, tech=tech, vorgaenger=projekte, before=vorgaenger, beschreibung=beschreibung)
+
+@app.route('/edit_project', methods=['POST']) 
+def editProjectPost():
+    id = request.form['kennung']
+    titel = request.form['titel']
+    finanzierungslimit = request.form['finanzierungslimit']
+    kategorie = request.form['kategorie']
+    vorgaenger = request.form['vorgaenger']
+    beschreibung = request.form['beschreibung']
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("UPDATE projekt SET titel = ?, finanzierungslimit = ?, kategorie = ?, vorgaenger = ?, beschreibung = ? WHERE kennung = ?", (titel, finanzierungslimit, kategorie, vorgaenger, beschreibung, id))
+    conn.commit()
+    return redirect(url_for('viewProjectGet', kennung=id))
+
+@app.route('/new_project_fund', methods=['GET'])
+def newProjectFundGet():
+    id = request.args.get('kennung')
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("SELECT titel FROM projekt WHERE kennung = " + str(id))
+    titel = curs.fetchall()
+    titel = titel[0][0]
+    return render_template('new_project_fund.html', titel=titel, kennung=id)
+
+@app.route('/new_project_fund', methods=['POST'])
+def newProjectFundPost():
+    id = request.form['kennung']
+    spender = currentUser
+    spendenbetrag = request.form['spendenbetrag']
+    if request.form.get('anonym'):
+        sichtbarkeit = request.form.get('anonym')
+    else:
+        sichtbarkeit = 'oeffentlich'
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("INSERT INTO spenden (spender, projekt, spendenbetrag, sichtbarkeit) VALUES (?,?,?,?)", (spender, id, spendenbetrag, sichtbarkeit))
+    # conn.commit()
+    curs.execute("UPDATE konto SET guthaben=guthaben-" + str(spendenbetrag) + " WHERE inhaber = '" + spender + "'")
+    # conn.commit()
+    return redirect(url_for('viewProjectGet', kennung=id))
+
+@app.route('/view_profile', methods=['GET'])
+def viewProfileGet():
+    email = currentUser
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("SELECT name FROM benutzer WHERE email = '" + email + "'")
+    name = curs.fetchall()
+    name = name[0][0]
+    curs.execute("SELECT kennung, titel, CAST(beschreibung AS VARCHAR(1000)) AS beschreibung, status, finanzierungslimit, ersteller, vorgaenger, kategorie FROM projekt WHERE ersteller = '" + email + "'")
+    erstellt = curs.fetchall()
+    curs.execute("SELECT p.titel, p.finanzierungslimit, p.status, s.spendenbetrag FROM spenden s JOIN projekt p ON s.projekt=p.kennung WHERE s.sichtbarkeit='oeffentlich' AND s.spender='" + email + "'")
+    unterstuetzt = curs.fetchall()
+    return render_template("view_profile.html", email=email, name=name, noErstellt=len(erstellt), noUnterstuetzt=len(unterstuetzt), erstellt=erstellt, unterstuetzt=unterstuetzt)
+
+@app.route('/new_comment', methods=['GET'])
+def newCommentGet():
+    id = request.args.get('kennung')
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("SELECT titel FROM projekt WHERE kennung = " + str(id))
+    titel = curs.fetchall()
+    titel = titel[0][0]
+    return render_template('new_comment.html', titel=titel, kennung=id)
+
+@app.route('/new_comment', methods=['POST'])
+def newCommentPost():
+    id = request.form['kennung']
+    print("projekt id:", id)
+    text = request.form.get('comment')
+    if request.form.get('anonym'):
+        sichtbarkeit = request.form.get('anonym')
+    else:
+        sichtbarkeit = 'oeffentlich'
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    curs.execute("INSERT INTO kommentar (text, sichtbarkeit) VALUES (?,?)", (text, sichtbarkeit))
+    conn.commit()
+    curs.execute("SELECT MAX(id) FROM kommentar")
+    kid = curs.fetchall()
+    kid = kid[0][0]
+    curs.execute("INSERT INTO schreibt (benutzer, projekt, kommentar) VALUES (?,?,?)", (currentUser, id, kid))
+    conn.commit()
+    return redirect(url_for('viewProjectGet', kennung=id))
 
 if __name__ == "__main__":
     port = int("9" + re.match(r"([a-z]+)([0-9]+)", config["username"], re.I).groups()[1])

@@ -64,9 +64,9 @@ body{
             <h1>Aktionsleiste</h1>
             <br>
             <form method="get">
-                <button type="submit" formaction="new_project_fund">Spenden</button>
+                <button type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Spenden</button>
                 <button type="submit" formaction="view_main">Projekt löschen</button>
-                <button type="submit" formaction="edit_project">Projekt editieren</button>
+                <button type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren</button>
             </form>
         </div>
 
@@ -97,7 +97,7 @@ body{
         </div>
 
         <form action="new_comment" method="get">
-            <button type="submit">Kommentieren</button>
+            <button type="submit" name="kennung" value="{{ kennung }}">Kommentieren</button>
         </form>
 	</div>
 </body>

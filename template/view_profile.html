@@ -41,14 +41,32 @@ body{
 <body>
 	<div id="wrapper">
 		<div id="header">
-		<h1> ProjectFunder </h1>
+        <h1>Profil von {{ email }}</h1>
+        <h2>Benutzername: {{ name }}</h2>
+        <h2>Anzahl erstellter Projekte: {{ noErstellt }}</h2>
+        <h2>Anzahl unterstützter Projekte: {{ noUnterstuetzt }}</h2>
         </div>
-        <form action="view_profile" method="post">
-            <button name="profil">Mein Profil</button>
-        </form>
 		<div id="projekte">
-           
-		</div>
+            <h2>Erstelle Projekte</h2>
+            <br>
+            {% if erstellt %}
+                {% for er in erstellt %}
+                <form method="get" action="view_project"><button name="kennung" value="{{ er[0] }}">{{ er[1] }}</button></form>
+                <h3>Aktuell: {{ er[2] }}</h3>
+                <h3>Status: {{ er[3] }}</h3>
+                {% endfor %}
+            {% endif %}
+            <hr>
+            <h2>Unterstützte Projekte</h2>
+            <br>
+            {% if unterstuetzt %}
+                {% for un in unterstuetzt %}
+                <form method="get" action="view_project"><button name="kennung" value="{{ un[0] }}">{{ un[1] }}</button></form>
+                <h3>Aktuell: {{ un[2] }}</h3>
+                <h3>Status: {{ er[3] }}</h3>
+                {% endfor %}
+            {% endif %}
+        </div>
 	</div>
 </body>
 </html>
