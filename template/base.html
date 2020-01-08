@@ -102,13 +102,13 @@
           
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                </li>
                 {% set hideprofile = hideprofile|default('show') %}
                 {% if hideprofile == 'show' %}
+                <li class="nav-item active">
+                    <form method="get" action="view_main"><button class="btn btn-dark">Home</button></form>
+                </li>
                 <li class="nav-item">
-                  <form method="get" action="view_profile"><button class="btn btn-dark">Mein Profil</button></form>
+                    <form method="get" action="view_profile"><button class="btn btn-dark">Mein Profil</button></form>
                 </li>
                 <li class="nav-item">
                     <form method="get" action="new_project"><button class="btn btn-dark">Projekt erstellen</button></form>

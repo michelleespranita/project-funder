@@ -291,17 +291,30 @@ def newProjectFundPost():
 
 @app.route('/view_profile', methods=['GET'])
 def viewProfileGet():
-    email = currentUser
+    if request.args.get('benutzer'):
+        email = request.args.get('benutzer')
+    else:
+        email = currentUser
     conn = connect.DBUtil().getExternalConnection()
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
     curs.execute("SELECT name FROM benutzer WHERE email = '" + email + "'")
     name = curs.fetchall()
     name = name[0][0]
-    curs.execute("SELECT kennung, titel, status, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE ersteller = '" + email + "'")
-    erstellt = curs.fetchall()
-    curs.execute("SELECT p.titel, p.finanzierungslimit, p.status, s.spendenbetrag FROM spenden s JOIN projekt p ON s.projekt=p.kennung WHERE s.sichtbarkeit='oeffentlich' AND s.spender='" + email + "'")
-    unterstuetzt = curs.fetchall()
+    curs.execute("SELECT kennung, titel, status, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE ersteller='" + email + "'")
+    # curs.execute("WITH s(proj, totalSpende) AS (SELECT projekt, SUM(spendenbetrag) AS totalSpende FROM spenden GROUP BY projekt) SELECT p.kennung, p.titel, s.totalSpende, p.status, k.icon FROM projekt p, kategorie k, s WHERE p.kategorie=k.id AND p.kennung=s.proj AND p.ersteller = '" + email + "'")
+    erstellt = curs.fetchall() # [(1, 'Ubuntu Touch', 1500.56, 'offen', '/static/...'), ...]
+    print(erstellt)
+    projektIDs = [str(er[0]) for er in erstellt]
+    projektIDs = ','.join(projektIDs)
+    curs.execute("SELECT projekt, SUM(spendenbetrag) FROM spenden WHERE projekt IN (" + projektIDs + ") GROUP BY projekt")
+    spendenbetraege = curs.fetchall()
+    if len(spendenbetraege)>0:
+        erstellt = [(er[0], er[1], spendenbetrag[1], er[2], er[3]) if spendenbetrag[0] == er[0] else (er[0], er[1], 0, er[2], er[3]) for er in erstellt for spendenbetrag in spendenbetraege]
+    else:
+        erstellt = [(er[0], er[1], 0, er[2], er[3]) for er in erstellt]
+    curs.execute("SELECT p.kennung, p.titel, p.finanzierungslimit, p.status, k.icon, s.spendenbetrag FROM spenden s, projekt p, kategorie k WHERE p.kategorie=k.id AND s.projekt=p.kennung AND s.sichtbarkeit='oeffentlich' AND s.spender='" + email + "'")
+    unterstuetzt = curs.fetchall() # [(1, 'Ubuntu Touch', 50000, 'offen', '/static/...', 1500.56), ...]
     return render_template("view_profile.html", email=email, name=name, noErstellt=len(erstellt), noUnterstuetzt=len(unterstuetzt), erstellt=erstellt, unterstuetzt=unterstuetzt)
 
 @app.route('/new_comment', methods=['GET'])

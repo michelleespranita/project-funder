@@ -1,104 +1,77 @@
-<html>
-<head><title>view_main</title>
-<style type="text/css">
-* {
-   margin:0;
-   padding:0;
-}
+{% extends "base.html" %}
+{% block content %}
+<div class="header verylight">
+    <div class="titel">Informationen</div>
+    <img src="{{ pfad }}">
+    <h2>{{ titel }}</h2>
+    <h3>{{ beschreibung }}</h3>
+    <h3>Finanzierungslimit: {{ finanzierungslimit }}</h3>
+    <h3>Aktuelle Spendensumme: {{ spendensumme }}</h3>
+    <h3>Status: {{ status }}</h3>
+</div>
 
-body{
-   text-align:center;
-   background: #efe4bf none repeat scroll 0 0;
-}
 
-#wrapper{
-   width:960px;
-   margin:0 auto;
-   text-align:left;
-   background-color: #fff;
-   border-radius: 0 0 10px 10px;
-   padding: 20px;
-   box-shadow: 1px -2px 14px rgba(0, 0, 0, 0.4);
-}
 
-#header{
- color: #fff;
- background-color: #2c5b9c;
- height: 3.5em;
- padding: 1em 0em 1em 1em;
 
-}
-
-#site{
-    background-color: #fff;
-    padding: 20px 0px 0px 0px;
-}
-.centerBlock{
-	margin:0 auto;
-}
-</style>
-
-<body>
-	<div id="wrapper">
-		<div id="info">
-            <h1>Informationen</h1>
-            
-            <img src="">
-            <h2>{{ titel }}</h2>
-            <h3>von {{ ersteller }}</h3>
-            <br>
-            <h3>{{ beschreibung }}</h3>
-            <div id="desc">
-                <h2>Finanzierungslimit: {{ finanzierungslimit }}</h2>
-                <h2>Aktuelle Spendensumme: {{ spendensumme }}</h2>
-                <h2>Status: {{ status }}</h2>
-                {% if vorgaenger %}
-                <h2>Vorgänger-Projekt: {{ vorgaenger }}</h2>
-                {% endif %}
-            </div>
-        </div>
-
-        <hr>
-
-        <div id="aktionsleiste">
-            <h1>Aktionsleiste</h1>
-            <br>
-            <form method="get">
-                <button type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Spenden</button>
-                <button type="submit" formaction="delete_project" name="kennung" value="{{ kennung }}">Projekt löschen</button>
-                <button type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren</button>
-            </form>
-        </div>
-
-        <hr>
+<!-- <div id="wrapper">
+    <div id="info">
+        <h1>Informationen</h1>
         
-        <div id="spenderliste">
-            <h1>Liste der Spender</h1>
-            {% if spender %}
-                {% for spend in spender %}
-                {{ spend[0] }}: {{ spend[1] }}<br>
-                {% endfor %}
+        <img src="">
+        <h2>{{ titel }}</h2>
+        <h3>von {{ ersteller }}</h3>
+        <br>
+        <h3>{{ beschreibung }}</h3>
+        <div id="desc">
+            <h2>Finanzierungslimit: {{ finanzierungslimit }}</h2>
+            <h2>Aktuelle Spendensumme: {{ spendensumme }}</h2>
+            <h2>Status: {{ status }}</h2>
+            {% if vorgaenger %}
+            <h2>Vorgänger-Projekt: {{ vorgaenger }}</h2>
             {% endif %}
         </div>
+    </div>
 
-        <hr>
+    <hr>
 
-        <div id="kommentare">
-            <h1>Kommentare</h1>
-            {% if kommentare %}
-                {% for kommentar in kommentare %}
-                    {% if kommentar[2] == 'oeffentlich' %}
-                        {{ kommentar[0] }}: {{ kommentar[1] }}<br>
-                    {% else %}
-                        Anonym: {{ kommentar[1] }}<br>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        </div>
-
-        <form action="new_comment" method="get">
-            <button type="submit" name="kennung" value="{{ kennung }}">Kommentieren</button>
+    <div id="aktionsleiste">
+        <h1>Aktionsleiste</h1>
+        <br>
+        <form method="get">
+            <button type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Spenden</button>
+            <button type="submit" formaction="delete_project" name="kennung" value="{{ kennung }}">Projekt löschen</button>
+            <button type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren</button>
         </form>
-	</div>
-</body>
-</html>
+    </div>
+
+    <hr>
+    
+    <div id="spenderliste">
+        <h1>Liste der Spender</h1>
+        {% if spender %}
+            {% for spend in spender %}
+            {{ spend[0] }}: {{ spend[1] }}<br>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <div id="kommentare">
+        <h1>Kommentare</h1>
+        {% if kommentare %}
+            {% for kommentar in kommentare %}
+                {% if kommentar[2] == 'oeffentlich' %}
+                    {{ kommentar[0] }}: {{ kommentar[1] }}<br>
+                {% else %}
+                    Anonym: {{ kommentar[1] }}<br>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <form action="new_comment" method="get">
+        <button type="submit" name="kennung" value="{{ kennung }}">Kommentieren</button>
+    </form>
+</div> -->
+{% endblock %}

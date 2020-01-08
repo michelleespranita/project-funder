@@ -1,68 +1,75 @@
-<html>
-<head><title>new_project</title>
-<style type="text/css">
-* {
-   margin:0;
-   padding:0;
-}
-
-body{
-   text-align:center;
-   background: #efe4bf none repeat scroll 0 0;
-}
-
-#wrapper{
-   width:960px;
-   margin:0 auto;
-   text-align:left;
-   background-color: #fff;
-   border-radius: 0 0 10px 10px;
-   padding: 20px;
-   box-shadow: 1px -2px 14px rgba(0, 0, 0, 0.4);
-}
-
-#header{
- color: #fff;
- background-color: #2c5b9c;
- height: 3.5em;
- padding: 1em 0em 1em 1em;
-
-}
-
-#site{
-    background-color: #fff;
-    padding: 20px 0px 0px 0px;
-}
-.centerBlock{
-	margin:0 auto;
-}
+{% extends "base.html" %}
+{% block content %}
+<style>
+   .titel {
+      color: #29a19c;
+   }
+   .form {
+      color: #393e46;
+      text-align: justify;
+   }
+   .button {
+      text-align: center;
+   }
 </style>
-
-<body>
-	<div id="wrapper">
-		<div id="header">
-		<h1> Projekt erstellen </h1>
-		</div>
-		<div id="form">
-		<form name="projekt" action="new_project" method="post">
-            Titel: <input type="text" name="titel"><br>
-            Finanzierungslimit: <input type="text" name="finanzierungslimit"><br>
-            Kategorie:<br>
-            <input type="radio" name="kategorie" value=1>Health & Wellness<br>
-            <input type="radio" name="kategorie" value=2>Art & Creative Works<br>
-            <input type="radio" name="kategorie" value=3>Education<br>
-            <input type="radio" name="kategorie" value=4>Tech & Innovation<br>
-            {% if vorgaenger %}
-            Vorgänger:<br>
+<div class="base verylight">
+   <div class="titel">
+      Projekt erstellen
+   </div>
+   <div class="form">
+      <form name="projekt" action="new_project" method="post">
+         <div class="form-group">
+            <label for="titel">Titel</label>
+            <input type="text" class="form-control" name="titel" placeholder="The New Facebook">
+         </div>
+         <div class="form-group">
+            <label for="limit">Finanzierungslimit</label>
+            <input type="text" class="form-control" name="limit" placeholder="100">
+         </div>
+         <div class="form-group">
+            <label for="kategorie">Kategorie</label>
+            <select class="form-control" name="kategorie">
+               <option value=1>Health & Wellness</option>
+               <option value=2>Art & Creative Works</option>
+               <option value=3>Education</option>
+               <option value=4>Tech & Innovation</option>
+            </select>
+         </div>
+         {% if vorgaenger %}
+         <div class="form-group">
+            <label for="vorgaenger">Vorgänger</label>
+            <select class="form-control" name="vorgaenger">
                {% for vor in vorgaenger %}
-               <input type="radio" name="vorgaenger" value="{{ vor[1] }}">{{ vor[1] }}<br>
+               <option value="{{ vor[1] }}">{{ vor[1] }}</option>
                {% endfor %}
-            {% endif %}
-            Beschreibung:<br>
-            <textarea rows=5 cols=50 name="beschreibung"></textarea><br>
-            <input type="submit" name="submitProject" value="Erstellen">
-        </form>
-		</div>
-	</div>
-</body>
-</html>
+            </select>
+         </div> 
+         {% endif %}
+         <div class="form-group">
+            <label for="beschreibung">Beschreibung </label>
+            <textarea class="form-control" name="beschreibung" rows="3"></textarea>
+         </div>
+         <div class="button">
+            <button class="btn btn-info" type="submit" style="background-color: #29a19c" name="submitProject">Erstellen</button>
+         </div>
+      </form>
+
+         <!-- Titel: <input type="text" name="titel"><br>
+         Finanzierungslimit: <input type="text" name="finanzierungslimit"><br>
+         Kategorie:<br>
+         <input type="radio" name="kategorie" value=1>Health & Wellness<br>
+         <input type="radio" name="kategorie" value=2>Art & Creative Works<br>
+         <input type="radio" name="kategorie" value=3>Education<br>
+         <input type="radio" name="kategorie" value=4>Tech & Innovation<br>
+         {% if vorgaenger %}
+         Vorgänger:<br>
+            {% for vor in vorgaenger %}
+            <input type="radio" name="vorgaenger" value="{{ vor[1] }}">{{ vor[1] }}<br>
+            {% endfor %}
+         {% endif %}
+         Beschreibung:<br>
+         <textarea rows=5 cols=50 name="beschreibung"></textarea><br>
+         <input type="submit" name="submitProject" value="Erstellen"> -->
+   </div>
+</div>
+{% endblock %}
