@@ -30,6 +30,7 @@ def modifyPfad():
     rows = curs.fetchall()
     for row in rows:
         pic = re.search('[a-z]+\.png', row[2]).group(0)
+        pic = "/static/" + pic
         # print(pic)
         # sqlStatement = "UPDATE kategorie SET icon = '" + os.path.join(os.getcwd(), 'icons', pic) +  "' WHERE id = " + str(row[0])
         # curs.execute(sqlStatement)
@@ -118,15 +119,45 @@ def viewMainGet():
     conn = connect.DBUtil().getExternalConnection()
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
-    curs.execute("SELECT kennung, titel, ersteller FROM projekt WHERE status='offen'")
+    curs.execute("SELECT kennung, titel, ersteller, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE status='offen'")
     offeneProjekte = curs.fetchall()
-    curs.execute("SELECT kennung, titel, ersteller FROM projekt WHERE status='geschlossen'")
+    curs.execute("SELECT kennung, titel, ersteller, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE status='geschlossen'")
     abgeschlosseneProjekte = curs.fetchall()
     curs.execute("SELECT projekt, SUM(spendenbetrag) FROM spenden GROUP BY projekt")
     spendenbetraege = curs.fetchall()
-    offeneProjekte = [(offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], spendenbetrag[1]) if spendenbetrag[0] == offenesProjekt[0] else (offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], 0) for offenesProjekt in offeneProjekte for spendenbetrag in spendenbetraege]
-    abgeschlosseneProjekte = [(abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], spendenbetrag[1]) for abgeschlossenesProjekt in abgeschlosseneProjekte for spendenbetrag in spendenbetraege if spendenbetrag[0] == abgeschlossenesProjekt[0]]
+    offeneProjekte = [(offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], offenesProjekt[3], spendenbetrag[1]) if spendenbetrag[0] == offenesProjekt[0] else (offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], offenesProjekt[3], 0) for offenesProjekt in offeneProjekte for spendenbetrag in spendenbetraege]
+    abgeschlosseneProjekte = [(abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], abgeschlossenesProjekt[3], spendenbetrag[1]) for abgeschlossenesProjekt in abgeschlosseneProjekte for spendenbetrag in spendenbetraege if spendenbetrag[0] == abgeschlossenesProjekt[0]]
     return render_template("view_main.html", offeneProjekte=offeneProjekte, abgeschlosseneProjekte=abgeschlosseneProjekte)
+
+@app.route('/delete_project', methods=['GET'])
+def viewMainPost():
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    id = request.args.get('kennung')
+    # 1) --- Delete Kommentare ---
+    curs.execute("SELECT kommentar FROM schreibt WHERE projekt=" + str(id))
+    kommentarIDs = curs.fetchall() # [(1,), (2,)]
+    kommentarIDs = [str(kommentarID[0]) for kommentarID in kommentarIDs] # ['1','2'], changing it into string is necessary, otherwise .join won't work
+    kommentarIDs = ",".join(kommentarIDs) # "1,2"
+    # curs.execute("DELETE FROM schreibt WHERE projekt=" + str(id))
+    # conn.commit()
+    # curs.execute("DELETE FROM kommentar WHERE id IN (" + kommentarIDs + ")") # BEWARE OF SQL INJECTION!
+    # conn.commit()
+    # 2) --- Give money back to Spender ---
+    curs.execute("SELECT spender, spendenbetrag FROM spenden WHERE projekt=" + str(id))
+    spend = curs.fetchall() # [('alan@turing.com', 15000.0), ('donald@eKnuth.com', 1500.56)]
+    # for (spender, spendenbetrag) in spend:
+        # curs.execute("UPDATE konto SET guthaben = guthaben + " + str(spendenbetrag) + " WHERE inhaber = " + spender)
+        # conn.commit()
+    # 3) --- Delete Spenden ---
+    # curs.execute("DELETE FROM spenden WHERE projekt=" + str(id))
+    # conn.commit()
+    # 4) --- Delete Projekt ---
+    # curs.execute("DELETE FROM projekt WHERE kennung=" + str(id))
+    # conn.commit()
+    return redirect(url_for("viewMainGet"))
+
 
 @app.route('/new_project', methods=['GET'])
 def newProjectGet():
@@ -190,7 +221,7 @@ def viewProjectGet():
 
 @app.route('/edit_project', methods=['GET']) 
 def editProjectGet():
-    id = request.args.get('kennung')
+    id = request.args.get('kennung') # takes the value of the button "Projekt editieren"
     conn = connect.DBUtil().getExternalConnection()
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
@@ -267,7 +298,7 @@ def viewProfileGet():
     curs.execute("SELECT name FROM benutzer WHERE email = '" + email + "'")
     name = curs.fetchall()
     name = name[0][0]
-    curs.execute("SELECT kennung, titel, CAST(beschreibung AS VARCHAR(1000)) AS beschreibung, status, finanzierungslimit, ersteller, vorgaenger, kategorie FROM projekt WHERE ersteller = '" + email + "'")
+    curs.execute("SELECT kennung, titel, status, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE ersteller = '" + email + "'")
     erstellt = curs.fetchall()
     curs.execute("SELECT p.titel, p.finanzierungslimit, p.status, s.spendenbetrag FROM spenden s JOIN projekt p ON s.projekt=p.kennung WHERE s.sichtbarkeit='oeffentlich' AND s.spender='" + email + "'")
     unterstuetzt = curs.fetchall()

@@ -1,75 +1,104 @@
-<html>
-<head><title>view_main</title>
-<style type="text/css">
-* {
-   margin:0;
-   padding:0;
-}
-
-body{
-   text-align:center;
-   background: #efe4bf none repeat scroll 0 0;
-}
-
-#wrapper{
-   width:960px;
-   margin:0 auto;
-   text-align:left;
-   background-color: #fff;
-   border-radius: 0 0 10px 10px;
-   padding: 20px;
-   box-shadow: 1px -2px 14px rgba(0, 0, 0, 0.4);
-}
-
-#header{
- color: #fff;
- background-color: #2c5b9c;
- height: 3.5em;
- padding: 1em 0em 1em 1em;
-
-}
-
-#site{
-    background-color: #fff;
-    padding: 20px 0px 0px 0px;
-}
-.centerBlock{
-	margin:0 auto;
-}
-</style>
-
-<body>
-	<div id="wrapper">
-		<div id="header">
-		<h1> ProjectFunder </h1>
-        </div>
-        <form action="view_profile" method="post">
-            <button name="profil">Mein Profil</button>
-        </form>
-		<div id="projekte">
-            <h2>Offene Projekte</h2>
-            <br>
-            {% if offeneProjekte %}
-                {% for offenesProjekt in offeneProjekte %}
-                <form method="get" action="view_project"><button name="kennung" value="{{ offenesProjekt[0] }}">{{ offenesProjekt[1] }}</button></form>
-                <form method="get" action="view_profile"><button name="benutzer" value="{{ offenesProjekt[2] }}">Von: {{ offenesProjekt[2] }}</button></form>
-                <h3>Aktuell: {{ offenesProjekt[3] }}</h3>
-                {% endfor %}
+{% extends "base.html" %}
+{% block content %}
+{% if offeneProjekte %}
+<div class="base dark">
+    <div class="titel">Offene Projekte</div>
+    <br>
+    <div id="carousel" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            {% for offenesProjekt in offeneProjekte %}
+                {% if loop.index0 == 0 %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}" class="active"></li>
+                {% else %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}"></li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+        <div class="carousel-inner">
+        {% for offenesProjekt in offeneProjekte %}
+            {% if loop.index0 == 0 %}
+            <div class="carousel-item active">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ offenesProjekt[0] }}">{{ offenesProjekt[1] }}</button></form>
+                    <br>
+                    <form action="view_profile" method="get"><button name="benutzer" value="{{ offenesProjekt[2] }}">Von: {{ offenesProjekt[2] }}</button></form>
+                    <p>Aktuell: {{ offenesProjekt[4] }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="carousel-item">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ offenesProjekt[0] }}">{{ offenesProjekt[1] }}</button></form>
+                    <br>
+                    <form action="view_profile" method="get"><button name="benutzer" value="{{ offenesProjekt[2] }}">Von: {{ offenesProjekt[2] }}</button></form>
+                    <p>Aktuell: {{ offenesProjekt[4] }}</p>
+                </div>
+            </div>
             {% endif %}
-            <hr>
-            <h2>Abgeschlossene Projekte</h2>
-            <br>
-            {% if abgeschlosseneProjekte %}
-                {% for abgeschlossenesProjekt in abgeschlosseneProjekte %}
-                <form method="get" action="view_project"><button name="kennung" value="{{ abgeschlossenesProjekt[0] }}">{{ abgeschlossenesProjekt[1] }}</button></form>
-                <h3><a href="view_profile.html">Von: {{ abgeschlossenesProjekt[2] }}</a></h3>
-                <h3>Aktuell: {{ abgeschlossenesProjekt[3] }}</h3>
-                {% endfor %}
-            {% endif %}
+        {% endfor %}
         </div>
-        <form action="new_project" method="get">
-            <button name="newProject">Projekt erstellen</button>
-        </form>
-	</div>
-</body>
-</html>
+        <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% if abgeschlosseneProjekte %}
+<div class="base light">
+    <div class="titel">Abgeschlossene Projekte</div>
+    <br>
+    <div id="carousel" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            {% for abgeschlossenesProjekt in abgeschlosseneProjekte %}
+                {% if loop.index0 == 0 %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}" class="active"></li>
+                {% else %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}"></li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+        <div class="carousel-inner">
+        {% for abgeschlossenesProjekt in abgeschlosseneProjekte %}
+            {% if loop.index0 == 0 %}
+            <div class="carousel-item active">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ abgeschlossenesProjekt[0] }}">{{ abgeschlossenesProjekt[1] }}</button></form>
+                    <br>
+                    <form action="view_profile" method="get"><button name="benutzer" value="{{ abgeschlossenesProjekt[2] }}">Von: {{ abgeschlossenesProjekt[2] }}</button></form>
+                    <p>Aktuell: {{ abgeschlossenesProjekt[4] }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="carousel-item">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ abgeschlossenesProjekt[0] }}">{{ abgeschlossenesProjekt[1] }}</button></form>
+                    <br>
+                    <form action="view_profile" method="get"><button name="benutzer" value="{{ abgeschlossenesProjekt[2] }}">Von: {{ abgeschlossenesProjekt[2] }}</button></form>
+                    <p>Aktuell: {{ abgeschlossenesProjekt[4] }}</p>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

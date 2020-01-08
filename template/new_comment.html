@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="base light">
+   <div class="titel">
+      {{ titel }}
+   </div>
+   <br>
+   <div class="form">
+      <form action="new_comment" method="post">
+         <div class="form-group">
+            <textarea name="comment" class="form-control" id="kommentar" placeholder="Schreibe einen Kommentar..." rows="15"></textarea>
+         </div>
+         <input type="checkbox" name="anonym" value="privat"> Anonym kommentieren?<br>
+         <button class="btn btn-info" type="submit" name="kennung" value="{{ kennung }}">Kommentar hinzufügen</button>
+      </form>
+   </div>
+</div>
+{% endblock %}

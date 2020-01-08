@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="base dark">
+   <div class="titel">
+      {{ titel }}
+   </div>
+   <br>
+   <br>
+   <div class="form">
+      <form action="new_project_fund" method="post">
+         Spendenbetrag (€): <input type="text" name="spendenbetrag"><br><br>
+         <input type="checkbox" name="anonym" value="privat"> Anonym spenden?<br><br>
+         <button class="btn btn-info" type="submit" name="kennung" value="{{ kennung }}">Spenden</button>
+      </form>
+   </div>
+</div>
+{% endblock %}

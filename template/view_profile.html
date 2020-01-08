@@ -1,72 +1,114 @@
-<html>
-<head><title>view_profile</title>
-<style type="text/css">
-* {
-   margin:0;
-   padding:0;
-}
-
-body{
-   text-align:center;
-   background: #efe4bf none repeat scroll 0 0;
-}
-
-#wrapper{
-   width:960px;
-   margin:0 auto;
-   text-align:left;
-   background-color: #fff;
-   border-radius: 0 0 10px 10px;
-   padding: 20px;
-   box-shadow: 1px -2px 14px rgba(0, 0, 0, 0.4);
-}
-
-#header{
- color: #fff;
- background-color: #2c5b9c;
- height: 3.5em;
- padding: 1em 0em 1em 1em;
-
-}
-
-#site{
-    background-color: #fff;
-    padding: 20px 0px 0px 0px;
-}
-.centerBlock{
-	margin:0 auto;
-}
-</style>
-
-<body>
-	<div id="wrapper">
-		<div id="header">
-        <h1>Profil von {{ email }}</h1>
-        <h2>Benutzername: {{ name }}</h2>
-        <h2>Anzahl erstellter Projekte: {{ noErstellt }}</h2>
-        <h2>Anzahl unterstützter Projekte: {{ noUnterstuetzt }}</h2>
-        </div>
-		<div id="projekte">
-            <h2>Erstelle Projekte</h2>
-            <br>
-            {% if erstellt %}
-                {% for er in erstellt %}
-                <form method="get" action="view_project"><button name="kennung" value="{{ er[0] }}">{{ er[1] }}</button></form>
-                <h3>Aktuell: {{ er[2] }}</h3>
-                <h3>Status: {{ er[3] }}</h3>
-                {% endfor %}
+{% extends "base.html" %}
+{% block content %}
+<div class="header verylight">
+    <h1>{{ email }}</h1>
+    <h3>Benutzername: {{ name }}</h3>
+    <h3>Anzahl erstellter Projekte: {{ noErstellt }}</h3>
+    <h3>Anzahl unterstützter Projekte: {{ noUnterstuetzt }}</h3>
+</div>
+{% if erstellt %}
+<div class="base light">
+    <div class="titel">Erstelle Projekte</div>
+    <br>
+    <div id="carousel" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            {% for er in erstellt %}
+                {% if loop.index0 == 0 %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}" class="active"></li>
+                {% else %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}"></li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+        <div class="carousel-inner">
+        {% for er in erstellt %}
+            {% if loop.index0 == 0 %}
+            <div class="carousel-item active">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ er[0] }}">{{ er[1] }}</button></form>
+                    <p>Aktuell: {{ er[2] }}</p>
+                    <p>Status: {{ er[3] }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="carousel-item">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ er[0] }}">{{ er[1] }}</button></form>
+                    <p>Aktuell: {{ er[2] }}</p>
+                    <p>Status: {{ er[3] }}</p>
+                </div>
+            </div>
             {% endif %}
-            <hr>
-            <h2>Unterstützte Projekte</h2>
-            <br>
-            {% if unterstuetzt %}
-                {% for un in unterstuetzt %}
-                <form method="get" action="view_project"><button name="kennung" value="{{ un[0] }}">{{ un[1] }}</button></form>
-                <h3>Aktuell: {{ un[2] }}</h3>
-                <h3>Status: {{ er[3] }}</h3>
-                {% endfor %}
-            {% endif %}
+        {% endfor %}
         </div>
-	</div>
-</body>
-</html>
+        <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+{% endif %}
+    <br>
+    <!-- {% if erstellt %}
+        {% for er in erstellt %}
+        <form method="get" action="view_project"><button name="kennung" value="{{ er[0] }}">{{ er[1] }}</button></form>
+        <h3>Aktuell: {{ er[2] }}</h3>
+        <h3>Status: {{ er[3] }}</h3>
+        {% endfor %}
+    {% endif %}
+    <hr> -->
+{% if unterstuetzt %}
+<div class="base light">
+    <div class="titel">Unterstützte Projekte</div>
+    <br>
+    <div id="carousel" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            {% for un in unterstuetzt %}
+                {% if loop.index0 == 0 %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}" class="active"></li>
+                {% else %}
+                <li data-target="#carousel" data-slide-to="{{ loop.index0 }}"></li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+        <div class="carousel-inner">
+        {% for un in unterstuetzt %}
+            {% if loop.index0 == 0 %}
+            <div class="carousel-item active">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ un[0] }}">{{ un[1] }}</button></form>
+                    <p>Aktuell: {{ un[2] }}</p>
+                    <p>Status: {{ un[3] }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="carousel-item">
+                <div class="imgProjekt"><img src="{{ offenesProjekt[3] }}"></div>
+                <div class="imgProjektCaption">
+                    <form action="view_project" method="get"><button name="kennung" value="{{ un[0] }}">{{ un[1] }}</button></form>
+                    <p>Aktuell: {{ un[2] }}</p>
+                    <p>Status: {{ un[3] }}</p>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

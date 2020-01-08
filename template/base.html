@@ -1,0 +1,129 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Open+Sans|Roboto&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        html, body {
+            height: 100%;
+        }
+        .base {
+            max-width: 100%;
+            max-height: 100%;
+            height: 100%;
+            /* height: 85%; */
+            /* padding-left: 5%;
+            padding-right: 5%; */
+            position: static;
+        }
+        .header {
+            height: 50%;
+            padding-top: 5%;
+            padding-bottom: 10%;
+            text-align: center;
+        }
+        .header h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5em;
+        }
+        .form {
+            color: #f3ecd3;
+            font-size: 2em;
+            text-align: center;
+        }
+        .dark {
+            background-color: #0f4c75;
+        }
+        .light {
+            background-color: #3282b8;
+        }
+        .verylight {
+            background-color: #bbe1fa;
+        }
+        .titel {
+            font-family: 'Roboto', sans-serif;
+            font-size: 4.5em;
+            font-style: bold;
+            text-align: center;
+            color: white;
+        }
+        .container {
+            max-height: 100%;
+            max-width: 100%;
+            padding: 0px;
+            position: static;
+        }
+        .carousel-inner {
+            padding-left: 18%;
+        }
+        .imgProjekt {
+            float: left;
+            display: block;
+            /* position: relative; */
+            /* width: 40%; */
+        }
+        .imgProjektCaption {
+            float: left;
+            display: block;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2em;
+            color: #f3ecd3;
+        }
+        .imgProjektCaption button {
+            border: none;
+            background: none;
+            color: white;
+        }
+        
+        .form-group {
+            margin-left: 20%;
+            margin-right: 20%;
+        }
+        .form-control {
+            border-radius: 10px;
+        }
+        textarea::placeholder {
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Project Funder</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                {% set hideprofile = hideprofile|default('show') %}
+                {% if hideprofile == 'show' %}
+                <li class="nav-item">
+                  <form method="get" action="view_profile"><button class="btn btn-dark">Mein Profil</button></form>
+                </li>
+                <li class="nav-item">
+                    <form method="get" action="new_project"><button class="btn btn-dark">Projekt erstellen</button></form>
+                </li>
+                {% endif %}
+              </ul>
+              <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+              </form>
+            </div>
+          </nav>
+    </div>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

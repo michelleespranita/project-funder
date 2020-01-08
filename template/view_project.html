@@ -65,7 +65,7 @@ body{
             <br>
             <form method="get">
                 <button type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Spenden</button>
-                <button type="submit" formaction="view_main">Projekt löschen</button>
+                <button type="submit" formaction="delete_project" name="kennung" value="{{ kennung }}">Projekt löschen</button>
                 <button type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren</button>
             </form>
         </div>
