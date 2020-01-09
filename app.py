@@ -215,8 +215,9 @@ def viewProjectGet():
         spendensumme = 0
     curs.execute("SELECT benutzer.name, spendenbetrag FROM spenden JOIN benutzer ON spenden.spender=benutzer.email WHERE spenden.projekt= " + str(id) + " ORDER BY spendenbetrag DESC")
     spender = curs.fetchall()
-    curs.execute("SELECT b.name, CAST(k.text AS VARCHAR(1000)) AS text, k.sichtbarkeit FROM benutzer b, schreibt s, kommentar k WHERE b.email=s.benutzer AND k.id=s.kommentar AND s.projekt=" + str(id) + " ORDER BY k.datum DESC")
+    curs.execute("SELECT b.name, CAST(k.text AS VARCHAR(1000)) AS text, k.sichtbarkeit, k.datum FROM benutzer b, schreibt s, kommentar k WHERE b.email=s.benutzer AND k.id=s.kommentar AND s.projekt=" + str(id) + " ORDER BY k.datum DESC")
     kommentare = curs.fetchall()
+    kommentare = [(kom[0], kom[1], kom[2], re.match('[0-9-]+ \d+:\d+', kom[3]).group(0)) for kom in kommentare]
     return render_template("view_project.html", kennung=id, pfad=pfad, titel=titel, ersteller=ersteller, beschreibung=beschreibung, finanzierungslimit=finanzierungslimit, spendensumme=spendensumme, status=status, vorgaenger=vorgaenger, spender=spender, kommentare=kommentare)
 
 @app.route('/edit_project', methods=['GET']) 
@@ -301,18 +302,9 @@ def viewProfileGet():
     curs.execute("SELECT name FROM benutzer WHERE email = '" + email + "'")
     name = curs.fetchall()
     name = name[0][0]
-    curs.execute("SELECT kennung, titel, status, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE ersteller='" + email + "'")
-    # curs.execute("WITH s(proj, totalSpende) AS (SELECT projekt, SUM(spendenbetrag) AS totalSpende FROM spenden GROUP BY projekt) SELECT p.kennung, p.titel, s.totalSpende, p.status, k.icon FROM projekt p, kategorie k, s WHERE p.kategorie=k.id AND p.kennung=s.proj AND p.ersteller = '" + email + "'")
-    erstellt = curs.fetchall() # [(1, 'Ubuntu Touch', 1500.56, 'offen', '/static/...'), ...]
-    print(erstellt)
-    projektIDs = [str(er[0]) for er in erstellt]
-    projektIDs = ','.join(projektIDs)
-    curs.execute("SELECT projekt, SUM(spendenbetrag) FROM spenden WHERE projekt IN (" + projektIDs + ") GROUP BY projekt")
-    spendenbetraege = curs.fetchall()
-    if len(spendenbetraege)>0:
-        erstellt = [(er[0], er[1], spendenbetrag[1], er[2], er[3]) if spendenbetrag[0] == er[0] else (er[0], er[1], 0, er[2], er[3]) for er in erstellt for spendenbetrag in spendenbetraege]
-    else:
-        erstellt = [(er[0], er[1], 0, er[2], er[3]) for er in erstellt]
+    curs.execute("SELECT p.kennung, p.titel, p.status, k.icon, s.totalSpende FROM projekt p JOIN kategorie k ON p.kategorie=k.id LEFT JOIN (SELECT projekt, SUM(spendenbetrag) AS totalSpende FROM spenden GROUP BY projekt) AS s ON p.kennung=s.projekt WHERE p.ersteller='" + email + "' ORDER BY p.kennung")
+    erstellt = curs.fetchall() # [(1, 'Ubuntu Touch', 'offen', '/static/...', 17351), ...]
+    erstellt = [(er[0], er[1], er[2], er[3], er[4]) if er[4] != None else (er[0], er[1], er[2], er[3], 0) for er in erstellt]
     curs.execute("SELECT p.kennung, p.titel, p.finanzierungslimit, p.status, k.icon, s.spendenbetrag FROM spenden s, projekt p, kategorie k WHERE p.kategorie=k.id AND s.projekt=p.kennung AND s.sichtbarkeit='oeffentlich' AND s.spender='" + email + "'")
     unterstuetzt = curs.fetchall() # [(1, 'Ubuntu Touch', 50000, 'offen', '/static/...', 1500.56), ...]
     return render_template("view_profile.html", email=email, name=name, noErstellt=len(erstellt), noUnterstuetzt=len(unterstuetzt), erstellt=erstellt, unterstuetzt=unterstuetzt)

@@ -1,16 +1,139 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="header verylight">
-    <div class="titel">Informationen</div>
-    <img src="{{ pfad }}">
-    <h2>{{ titel }}</h2>
-    <h3>{{ beschreibung }}</h3>
-    <h3>Finanzierungslimit: {{ finanzierungslimit }}</h3>
-    <h3>Aktuelle Spendensumme: {{ spendensumme }}</h3>
-    <h3>Status: {{ status }}</h3>
+<style>
+    .titel {
+        color: #29a19c;
+    }
+    .imgProjekt {
+        margin-left: 10%;
+        margin-right: 3%;
+    }
+    .imgProjektCaption {
+        color: #393e46;
+    }
+    .imgProjektCaption h2 {
+        font-style: bold;
+        font-size: 1.8em;
+    }
+    .imgProjektCaption button{
+        color: #0f4c75;
+        font-size: 0.8em;
+    }
+    .imgProjektCaption button:hover{
+        text-decoration: underline;
+    }
+    .imgProjektCaption .desc {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    th {
+        padding: 3%;
+        font-size: 1.2em;
+        color: #5f6769;
+    }
+    .commentSection {
+        padding-left: 5%;
+        padding-right: 5%;
+    }
+    .commentItem {
+        border-radius: 10px;
+        border-style: solid;
+        border-color: #3282b8;
+        background-color: #3282b8;
+        padding: 2%;
+        line-height: 1;
+    }
+    .commentItem .user {
+        font-style: bold;
+        font-size: 2em;
+        color: white;
+    }
+    .commentItem .content {
+        color: #e4f9ff;
+    }
+    .commentItem .date {
+        color: #e8e4c9;
+        font-size: 0.8em;
+    }
+    #spenderListe {
+        height: auto;
+    }
+    #spenderListe .imgProjektCaption{
+        float: none;
+        display: inline;
+        text-align: center;
+    }
+</style>
+<div class="base verylight">
+    <div class="titel">Informationen</div><br>
+    <div class="imgProjekt"><img src="{{ pfad }}"></div>
+    <div class="imgProjektCaption">
+        <h2>{{ titel }}</h2>
+        <h3>{{ beschreibung }}</h3>
+        <div class="desc">
+            <table>
+                <tr>
+                    <th>Finanzierungslimit</th>
+                    <th>{{ finanzierungslimit }}€</th>
+                </tr>
+                <tr>
+                    <th>Aktuelle Spendensumme</th>
+                    <th>{{ spendensumme }}</th>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <th>{{ status }}</th>
+                </tr>
+            </table>
+        </div>
+        <form method="get">
+            <button class="btn" type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Spenden ></button>
+            <button class="btn" type="submit" formaction="delete_project" name="kennung" value="{{ kennung }}">Projekt löschen ></button>
+            <button class="btn" type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren ></button>
+        </form>
+    </div>
 </div>
-
-
+<div class="base light" id="spenderListe">
+    <div class="titel" style="color: white;">Liste der Spender</div><br>
+    {% if spender %}
+    <div class="flexContainer">
+        {% for spend in spender %}
+        <div class="flexItem">{{ spend[0] }}: {{ spend[1] }}</div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="imgProjektCaption">
+        <h2 style="color: #f3ecd3;">Noch keine vorhanden :(</h2>
+        <form method="get">
+            <button style="color: #66cccc;"class="btn" type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Jetzt spenden ></button>
+        </form>
+    </div>
+    {% endif %}
+    <br>
+</div>
+<div class="base dark">
+    <div class="titel" style="color: white;">Kommentare</div>
+    
+    <div class="commentSection">
+        {% if kommentare %}
+            {% for kommentar in kommentare %}
+                {% if kommentar[2] == 'oeffentlich' %}
+                <div class="commentItem">
+                    <div class="user">{{ kommentar[0] }}</div><br>
+                    <div class="date">{{ kommentar[3] }}</div><br>
+                    <div class="content">{{ kommentar[1] }}</div>
+                </div><br>
+                {% else %}
+                Anonym: {{ kommentar[1] }}<br>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <form method="get" action="new_comment"><button class="btn btn-info" style="color: white; float: right;"class="btn" type="submit" name="kennung" value="{{ kennung }}">Kommentieren</button></form>
+    </div>
+    
+</div>
 
 
 <!-- <div id="wrapper">
