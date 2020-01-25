@@ -8,7 +8,16 @@
    <br>
    <div class="form">
       <form action="new_project_fund" method="post">
-         Spendenbetrag (€): <input type="text" name="spendenbetrag"><br><br>
+         Spendenbetrag (€): <input type="number" step="0.01" min=0.01 name="spendenbetrag" required><br><br>
+         {% if warning == '1' %}
+         <div>
+            <span style="font-family: 'Roboto', sans-serif; font-size: 0.5em; color: red;">Guthaben auf Ihrem Konto nicht genug.</span>
+         </div>
+         {% elif warning == '2' %}
+         <div>
+            <span style="font-family: 'Roboto', sans-serif; font-size: 0.5em; color: red;">Sie haben für dieses Projekt schonmal gespendet.</span>
+         </div>
+         {% endif %}
          <input type="checkbox" name="anonym" value="privat"> Anonym spenden?<br><br>
          <button class="btn btn-info" type="submit" name="kennung" value="{{ kennung }}">Spenden</button>
       </form>

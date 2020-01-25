@@ -75,23 +75,40 @@
         <div class="desc">
             <table>
                 <tr>
+                    <th>Ersteller</th>
+                    <th><a href="{{ url_for('viewProfileGet', benutzer=ersteller[0]) }}">{{ ersteller[1] }}</a></th>
+                </tr>
+                <tr>
                     <th>Finanzierungslimit</th>
                     <th>{{ finanzierungslimit }}€</th>
                 </tr>
                 <tr>
                     <th>Aktuelle Spendensumme</th>
-                    <th>{{ spendensumme }}</th>
+                    <th>{{ spendensumme }}€</th>
                 </tr>
                 <tr>
                     <th>Status</th>
                     <th>{{ status }}</th>
                 </tr>
+                <tr>
+                    <th>Vorgänger-Projekt</th>
+                    {% if vorgaenger %}
+                    <th><a href="{{ url_for('viewProjectGet', kennung=vorgaenger[0]) }}">{{ vorgaenger[1] }}</a></th>
+                    {% else %}
+                    <th>Kein Vorgänger vorhanden</th>
+                    {% endif %}
+                </tr>
+                
             </table>
         </div>
         <form method="get">
+            {% if status == 'offen' %}
             <button class="btn" type="submit" formaction="new_project_fund" name="kennung" value="{{ kennung }}">Spenden ></button>
-            <button class="btn" type="submit" formaction="delete_project" name="kennung" value="{{ kennung }}">Projekt löschen ></button>
-            <button class="btn" type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren ></button>
+                {% if showEditProject %}
+                <button class="btn" type="submit" formaction="edit_project" name="kennung" value="{{ kennung }}">Projekt editieren ></button>
+                <button class="btn" type="submit" formaction="delete_project" name="kennung" value="{{ kennung }}">Projekt löschen ></button>
+                {% endif %}
+            {% endif %}
         </form>
     </div>
 </div>
@@ -100,7 +117,11 @@
     {% if spender %}
     <div class="flexContainer">
         {% for spend in spender %}
-        <div class="flexItem">{{ spend[0] }}: {{ spend[1] }}</div>
+            {% if spend[2] == 'oeffentlich' %}
+            <div class="flexItem">{{ spend[0] }}: {{ spend[1] }}</div>
+            {% else %}
+            <div class="flexItem">Anonym: {{ spend[1] }}</div>
+            {% endif %}
         {% endfor %}
     </div>
     {% else %}
@@ -126,7 +147,11 @@
                     <div class="content">{{ kommentar[1] }}</div>
                 </div><br>
                 {% else %}
-                Anonym: {{ kommentar[1] }}<br>
+                <div class="commentItem">
+                    <div class="user">Anonym</div><br>
+                    <div class="date">{{ kommentar[3] }}</div><br>
+                    <div class="content">{{ kommentar[1] }}</div>
+                </div><br>
                 {% endif %}
             {% endfor %}
         {% endif %}

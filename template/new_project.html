@@ -20,16 +20,22 @@
       <form name="projekt" action="new_project" method="post">
          <div class="form-group">
             <label for="titel">Titel</label>
-            <input type="text" class="form-control" name="titel" placeholder="The New Facebook">
+            <input type="text" class="form-control" name="titel" placeholder="The New Facebook" maxlength=30 required>
+            {% if warningTitel %}
+            <span style="font-family: 'Roboto', sans-serif; font-size: 0.5em; color: red;">Titel darf nicht leer sein und darf nicht 30 Buchstaben überschreiten.</span>
+            {% endif %}
          </div>
          <div class="form-group">
             <label for="limit">Finanzierungslimit</label>
-            <input type="text" class="form-control" name="limit" placeholder="100">
+            <input type="number" step="0.01" min=0 class="form-control" name="finanzierungslimit" placeholder="100">
+            {% if warningLimit %}
+            <span style="font-family: 'Roboto', sans-serif; font-size: 0.5em; color: red;">Finanzierungslimit muss eine Zahl sein (mindestens 100).</span>
+            {% endif %}
          </div>
          <div class="form-group">
             <label for="kategorie">Kategorie</label>
             <select class="form-control" name="kategorie">
-               <option value=1>Health & Wellness</option>
+               <option value=1 selected>Health & Wellness</option>
                <option value=2>Art & Creative Works</option>
                <option value=3>Education</option>
                <option value=4>Tech & Innovation</option>
@@ -40,8 +46,9 @@
             <label for="vorgaenger">Vorgänger</label>
             <select class="form-control" name="vorgaenger">
                {% for vor in vorgaenger %}
-               <option value="{{ vor[1] }}">{{ vor[1] }}</option>
+               <option value="{{ vor[0] }}">{{ vor[1] }}</option>
                {% endfor %}
+               <option value="0">Kein Vorgänger</option>
             </select>
          </div> 
          {% endif %}

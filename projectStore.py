@@ -10,10 +10,10 @@ class ProjectStore:
         self.complete = None
 
     # PREPARED STATEMENT (WITH PLACEHOLDERS)
-    def addProject(self, titel, finanzierungslimit, kategorie, beschreibung, ersteller):
+    def addProject(self, titel, finanzierungslimit, kategorie, beschreibung, ersteller, vorgaenger):
         curs = self.conn.cursor()
-        sqlStatement= "INSERT INTO PROJEKT (titel, beschreibung, finanzierungslimit, ersteller, kategorie) VALUES(?, ?, ?, ?, ?)"
-        curs.execute(sqlStatement, (titel, beschreibung, finanzierungslimit, ersteller, kategorie))
+        sqlStatement= "INSERT INTO PROJEKT (titel, beschreibung, finanzierungslimit, ersteller, vorgaenger, kategorie) VALUES(?, ?, ?, ?, ?, ?)"
+        curs.execute(sqlStatement, (titel, beschreibung, finanzierungslimit, ersteller, vorgaenger, kategorie))
         print('addProject')
 
     def completion(self):
