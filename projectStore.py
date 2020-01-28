@@ -14,7 +14,6 @@ class ProjectStore:
         curs = self.conn.cursor()
         sqlStatement= "INSERT INTO PROJEKT (titel, beschreibung, finanzierungslimit, ersteller, vorgaenger, kategorie) VALUES(?, ?, ?, ?, ?, ?)"
         curs.execute(sqlStatement, (titel, beschreibung, finanzierungslimit, ersteller, vorgaenger, kategorie))
-        print('addProject')
 
     def completion(self):
         self.complete = True

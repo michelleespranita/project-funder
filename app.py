@@ -31,9 +31,6 @@ def modifyPfad():
     for row in rows:
         pic = re.search('[a-z]+\.png', row[2]).group(0)
         pic = "/static/" + pic
-        # print(pic)
-        # sqlStatement = "UPDATE kategorie SET icon = '" + os.path.join(os.getcwd(), 'icons', pic) +  "' WHERE id = " + str(row[0])
-        # curs.execute(sqlStatement)
         curs.execute("UPDATE kategorie SET icon = ? WHERE id = ?", (pic, row[0]))
         conn.commit()
 
@@ -68,9 +65,9 @@ def viewMainGet():
     conn = connect.DBUtil().getExternalConnection()
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
-    curs.execute("SELECT kennung, titel, ersteller, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE status='offen'")
+    curs.execute("SELECT kennung, titel, benutzer.name, kategorie.icon, email FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id JOIN benutzer ON projekt.ersteller=benutzer.email WHERE status='offen'")
     offeneProjekte = curs.fetchall()
-    curs.execute("SELECT kennung, titel, ersteller, kategorie.icon FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id WHERE status='geschlossen'")
+    curs.execute("SELECT kennung, titel, benutzer.name, kategorie.icon, email FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id JOIN benutzer ON projekt.ersteller=benutzer.email WHERE status='geschlossen'")
     abgeschlosseneProjekte = curs.fetchall()
     curs.execute("SELECT projekt, SUM(spendenbetrag) FROM spenden GROUP BY projekt")
     spendenbetraege = curs.fetchall()
@@ -85,10 +82,10 @@ def viewMainGet():
             offenesProjekt = offeneProjekte[i]
             spendenbetrag = [spendenbetrag[1] for spendenbetrag in spendenbetraege if offenesProjektID == spendenbetrag[0]]
             spendenbetrag = spendenbetrag[0]
-            offeneProjekteHTML.append((offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], offenesProjekt[3], spendenbetrag))
+            offeneProjekteHTML.append((offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], offenesProjekt[3], offenesProjekt[4], spendenbetrag))
         else:
             offenesProjekt = offeneProjekte[i]
-            offeneProjekteHTML.append((offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], offenesProjekt[3], 0))
+            offeneProjekteHTML.append((offenesProjekt[0], offenesProjekt[1], offenesProjekt[2], offenesProjekt[3], offenesProjekt[4], 0))
         i+=1
 
     abgeschlosseneProjekteIDs = [abgeschlossenesProjekt[0] for abgeschlossenesProjekt in abgeschlosseneProjekte]
@@ -100,10 +97,10 @@ def viewMainGet():
             abgeschlossenesProjekt = abgeschlosseneProjekte[i]
             spendenbetrag = [spendenbetrag[1] for spendenbetrag in spendenbetraege if abgeschlossenesProjektID == spendenbetrag[0]]
             spendenbetrag = spendenbetrag[0]
-            abgeschlosseneProjekteHTML.append((abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], abgeschlossenesProjekt[3], spendenbetrag))
+            abgeschlosseneProjekteHTML.append((abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], abgeschlossenesProjekt[3], abgeschlossenesProjekt[4], spendenbetrag))
         else:
             abgeschlossenesProjekt = abgeschlosseneProjekte[i]
-            abgeschlosseneProjekteHTML.append((abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], abgeschlossenesProjekt[3], 0))
+            abgeschlosseneProjekteHTML.append((abgeschlossenesProjekt[0], abgeschlossenesProjekt[1], abgeschlossenesProjekt[2], abgeschlossenesProjekt[3], abgeschlossenesProjekt[4], 0))
         i+=1
 
     return render_template("view_main.html", offeneProjekte=offeneProjekteHTML, abgeschlosseneProjekte=abgeschlosseneProjekteHTML)
@@ -115,8 +112,7 @@ def newProjectGet():
     curs = conn.cursor()
     warningTitel = request.args.get('warningTitel')
     warningLimit = request.args.get('warningLimit')
-    sqlStatement = "SELECT * FROM projekt WHERE ersteller = ?", (currentUser,) # Change with prepared statement!
-    curs.execute(sqlStatement)
+    curs.execute("SELECT * FROM projekt WHERE ersteller = ?", (currentUser,))
     projekte = curs.fetchall()
     return render_template("new_project.html", vorgaenger=projekte, warningTitel=warningTitel, warningLimit=warningLimit)
 
@@ -134,8 +130,9 @@ def newProjectPost():
         return redirect(url_for("newProjectGet", warningLimit=True))
     kategorie = request.form.get('kategorie')
     vorgaenger = request.form.get('vorgaenger')
-    print(vorgaenger)
-    if int(vorgaenger) == 0:
+    if vorgaenger == None:
+        pass
+    elif int(vorgaenger) == 0:
         vorgaenger = None
     beschreibung = request.form.get('beschreibung')
     ersteller = currentUser
@@ -247,7 +244,10 @@ def editProjectPost():
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
     curs.execute("UPDATE projekt SET titel = ?, finanzierungslimit = ?, kategorie = ?, vorgaenger = ?, beschreibung = ? WHERE kennung = ?", (titel, finanzierungslimit, kategorie, vorgaenger, beschreibung, id))
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as e:
+        print(e)
     return redirect(url_for('viewProjectGet', kennung=id))
 
 @app.route('/delete_project', methods=['GET'])
@@ -262,25 +262,43 @@ def viewMainPost():
     kommentarIDs = [kommentarID[0] for kommentarID in kommentarIDs] # [1,2]
     if len(kommentarIDs) > 0: # If there are actually any
         curs.execute("DELETE FROM schreibt WHERE projekt = ?", (id,))
-        conn.commit()
+        try:
+            conn.commit()
+        except Exception as e:
+            print(e)
         for kommentarID in kommentarIDs:
             curs.execute("DELETE FROM kommentar WHERE id = ?", (kommentarID,))
-            conn.commit()
+            try:
+                conn.commit()
+            except Exception as e:
+                print(e)
     # 2) --- Give money back to Spender ---
     curs.execute("SELECT spender, spendenbetrag FROM spenden WHERE projekt = ?", (id,))
     spend = curs.fetchall() # [('alan@turing.com', 15000.0), ('donald@eKnuth.com', 1500.56)]
     print(spend)
     for (spender, spendenbetrag) in spend:
         curs.execute("UPDATE konto SET guthaben = guthaben + ? WHERE inhaber = ?", (spendenbetrag, spender))
-        conn.commit()
+        try:
+            conn.commit()
+        except Exception as e:
+            print(e)
     # 3) --- Delete Spenden ---
     curs.execute("DELETE FROM spenden WHERE projekt = ?", (id,))
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as e:
+        print(e)
     # 4) --- Delete Projekt ---
     curs.execute("UPDATE projekt SET vorgaenger = NULL WHERE vorgaenger = ?", (id,))
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as e:
+        print(e)
     curs.execute("DELETE FROM projekt WHERE kennung = ?", (id,))
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as e:
+        print(e)
     return redirect(url_for("viewMainGet"))
 
 @app.route('/new_project_fund', methods=['GET'])
@@ -329,7 +347,10 @@ def newProjectFundPost():
     finanzierungslimit = curs.fetchall()[0][0]
     if spendensumme >= finanzierungslimit:
         curs.execute("UPDATE projekt SET status = 'geschlossen' WHERE kennung = ?", (id,))
-        conn.commit()
+        try:
+            conn.commit()
+        except Exception as e:
+            print(e)
     return redirect(url_for('viewProjectGet', kennung=id))
 
 @app.route('/view_profile', methods=['GET'])
@@ -365,7 +386,6 @@ def newCommentGet():
 @app.route('/new_comment', methods=['POST'])
 def newCommentPost():
     id = request.form['kennung']
-    print("projekt id:", id)
     text = request.form.get('comment')
     if request.form.get('anonym'):
         sichtbarkeit = request.form.get('anonym')
@@ -375,13 +395,52 @@ def newCommentPost():
     conn.jconn.setAutoCommit(False)
     curs = conn.cursor()
     curs.execute("INSERT INTO kommentar (text, sichtbarkeit) VALUES (?,?)", (text, sichtbarkeit))
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as e:
+        print(e)
     curs.execute("SELECT MAX(id) FROM kommentar")
     kid = curs.fetchall()
     kid = kid[0][0]
     curs.execute("INSERT INTO schreibt (benutzer, projekt, kommentar) VALUES (?,?,?)", (currentUser, id, kid))
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as e:
+        print(e)
     return redirect(url_for('viewProjectGet', kennung=id))
+
+@app.route('/search_project', methods=['POST'])
+def searchProjectPost():
+    conn = connect.DBUtil().getExternalConnection()
+    conn.jconn.setAutoCommit(False)
+    curs = conn.cursor()
+    queryText = request.form['search']
+    queryText = queryText.lower()
+    if queryText == '':
+        return render_template('search_project.html', warning=True)
+    curs.execute("SELECT kennung, titel, benutzer.name, status, kategorie.icon, email FROM projekt JOIN kategorie ON projekt.kategorie=kategorie.id JOIN benutzer ON projekt.ersteller=benutzer.email WHERE lcase(titel) LIKE ?", (queryText + '%',))
+    queryRes = curs.fetchall()
+    curs.execute("SELECT projekt, SUM(spendenbetrag) FROM spenden GROUP BY projekt")
+    spendenbetraege = curs.fetchall()
+
+    resIDs = [res[0] for res in queryRes]
+    spendenbetraegeIDs = [spendenbetrag[0] for spendenbetrag in spendenbetraege]
+    
+    projekteHTML = []
+
+    i = 0
+    for resID in resIDs:
+        if resID in spendenbetraegeIDs:
+            projekt = queryRes[i]
+            spendenbetrag = [spendenbetrag[1] for spendenbetrag in spendenbetraege if resID == spendenbetrag[0]]
+            spendenbetrag = spendenbetrag[0]
+            projekteHTML.append((projekt[0], projekt[1], projekt[2], projekt[3], projekt[4], projekt[5], spendenbetrag))
+        else:
+            projekt = queryRes[i]
+            projekteHTML.append((projekt[0], projekt[1], projekt[2], projekt[3], projekt[4], projekt[5], 0))
+        i+=1
+
+    return render_template('search_project.html', projekte=projekteHTML)
 
 if __name__ == "__main__":
     port = int("9" + re.match(r"([a-z]+)([0-9]+)", config["username"], re.I).groups()[1])
